@@ -21,7 +21,7 @@ export default function Home() {
           style={{ background: "#F5A623", filter: "blur(120px)" }}
         />
         <ScrollSection delay={0}>
-          <Image src="/shaan-avatar.svg" alt="Uncle Shaan" width={88} height={88} className="mx-auto mb-6" />
+          <Image src="/shaan-avatar.png" alt="Uncle Shaan" width={88} height={88} className="mx-auto mb-6" />
         </ScrollSection>
         <ScrollSection delay={100}>
           <p className="text-sm font-medium tracking-widest text-[#6B6B6B] uppercase mb-4">Uncle Shaan</p>
@@ -76,7 +76,7 @@ export default function Home() {
               &ldquo;{quote1.quote}&rdquo;
             </blockquote>
             <div className="flex items-center gap-3">
-              <Image src="/shaan-avatar.svg" alt="" width={32} height={32} />
+              <Image src="/shaan-avatar.png" alt="" width={32} height={32} />
               <span className="text-sm text-[#6B6B6B]">{quote1.source_title} · {quote1.date}</span>
             </div>
           </ScrollSection>
@@ -106,7 +106,7 @@ export default function Home() {
               &ldquo;{quote3.quote}&rdquo;
             </blockquote>
             <div className="flex items-center gap-3">
-              <Image src="/shaan-avatar.svg" alt="" width={32} height={32} />
+              <Image src="/shaan-avatar.png" alt="" width={32} height={32} />
               <span className="text-sm text-[#6B6B6B]">{quote3.source_title} · {quote3.date}</span>
             </div>
           </ScrollSection>
@@ -128,7 +128,7 @@ export default function Home() {
       {/* FINAL CTA */}
       <section className="min-h-screen flex flex-col items-center justify-center px-6 py-24 text-center">
         <ScrollSection className="max-w-lg mx-auto">
-          <Image src="/shaan-avatar.svg" alt="Uncle Shaan" width={72} height={72} className="mx-auto mb-8" />
+          <Image src="/shaan-avatar.png" alt="Uncle Shaan" width={72} height={72} className="mx-auto mb-8" />
           <h2 className="text-4xl md:text-5xl font-bold text-[#111111] mb-4">
             Where are you<br />right now?
           </h2>

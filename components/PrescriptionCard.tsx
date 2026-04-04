@@ -32,7 +32,7 @@ export default function PrescriptionCard({ entry, reason, index }: Props) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Image
-            src="/shaan-avatar.svg"
+            src="/shaan-avatar.png"
             alt="Uncle Shaan"
             width={28}
             height={28}

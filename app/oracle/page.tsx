@@ -35,7 +35,7 @@ export default function OraclePage() {
           ← Back
         </Link>
         <div className="flex items-center gap-2">
-          <Image src="/shaan-avatar.svg" alt="Uncle Shaan" width={28} height={28} />
+          <Image src="/shaan-avatar.png" alt="Uncle Shaan" width={28} height={28} />
           <span className="text-sm font-medium text-[#111111]">Uncle Shaan</span>
         </div>
       </div>
@@ -43,7 +43,7 @@ export default function OraclePage() {
       {!revealed ? (
         /* Pre-pull state */
         <div className="flex flex-col items-center text-center gap-6 max-w-sm mx-auto px-4">
-          <Image src="/shaan-avatar.svg" alt="Uncle Shaan" width={96} height={96} className="mb-2" />
+          <Image src="/shaan-avatar.png" alt="Uncle Shaan" width={96} height={96} className="mb-2" />
           <h1 className="text-3xl font-bold text-[#111111]">What does<br />Uncle Shaan say?</h1>
           <p className="text-[#6B6B6B] text-base leading-relaxed">
             Pull a card. Get a piece of wisdom from Shaan&apos;s actual writing.

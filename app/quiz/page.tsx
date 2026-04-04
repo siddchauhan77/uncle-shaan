@@ -119,7 +119,7 @@ export default function QuizPage() {
   if (loading) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center px-4 gap-6">
-        <Image src="/shaan-avatar.svg" alt="" width={64} height={64} className="animate-pulse" />
+        <Image src="/shaan-avatar.png" alt="" width={64} height={64} className="animate-pulse" />
         <p className="text-[#111111] font-semibold text-lg">Uncle Shaan is thinking...</p>
         <p className="text-[#6B6B6B] text-sm">Finding exactly what you need to read</p>
       </main>
@@ -133,7 +133,7 @@ export default function QuizPage() {
           <Link href="/" className="text-sm text-[#6B6B6B] hover:text-[#111111]">← Back</Link>
         </div>
         <div className="flex items-center gap-3 mb-6">
-          <Image src="/shaan-avatar.svg" alt="Uncle Shaan" width={44} height={44} />
+          <Image src="/shaan-avatar.png" alt="Uncle Shaan" width={44} height={44} />
           <div>
             <h1 className="text-xl font-bold text-[#111111]">Your prescription</h1>
             <p className="text-sm text-[#6B6B6B]">From Uncle Shaan, just for you</p>
@@ -165,7 +165,7 @@ export default function QuizPage() {
       <div className="flex items-center justify-between mb-10">
         <Link href="/" className="text-sm text-[#6B6B6B] hover:text-[#111111]">← Back</Link>
         <div className="flex items-center gap-2">
-          <Image src="/shaan-avatar.svg" alt="" width={28} height={28} />
+          <Image src="/shaan-avatar.png" alt="" width={28} height={28} />
           <span className="text-sm font-medium text-[#111111]">Uncle Shaan&apos;s quiz</span>
         </div>
       </div>

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { getContentMetadata, getEntriesByIds } from "@/lib/content";
-
-const client = new Anthropic();
 
 type Answers = {
   situation: string;
@@ -13,6 +11,7 @@ type Answers = {
 };
 
 export async function POST(req: NextRequest) {
+  const client = new OpenAI();
   const { answers } = (await req.json()) as { answers: Answers };
   const metadata = getContentMetadata();
 
@@ -38,13 +37,13 @@ Select the 4 most relevant entries for this specific person. Return ONLY valid J
   ]
 }`;
 
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
+  const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
     max_tokens: 512,
     messages: [{ role: "user", content: prompt }],
   });
 
-  const text = message.content[0].type === "text" ? message.content[0].text : "";
+  const text = response.choices[0].message.content ?? "";
   const parsed = JSON.parse(text);
   const picks: { id: string; reason: string }[] = parsed.picks;
 

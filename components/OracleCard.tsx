@@ -40,7 +40,7 @@ export default function OracleCard({ entry, onPullAnother }: Props) {
             </blockquote>
             <div className="flex items-center gap-3">
               <Image
-                src="/shaan-avatar.svg"
+                src="/shaan-avatar.png"
                 alt="Uncle Shaan"
                 width={36}
                 height={36}
