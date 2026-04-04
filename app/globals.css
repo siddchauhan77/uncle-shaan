@@ -1,42 +1,132 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────
+   Design tokens — aged paper, dark ink, rust
+   ───────────────────────────────────────────── */
+
 :root {
-  --bg-primary: #FAFAF8;
-  --text-primary: #111111;
-  --text-secondary: #6B6B6B;
-  --accent: #F5A623;
-  --card-bg: #FFFFFF;
+  /* Paper palette */
+  --paper:        #F0E8D5;
+  --paper-warm:   #EAE0C8;
+  --paper-light:  #FAF6EC;
+
+  /* Ink */
+  --ink:          #1A1008;
+  --ink-mid:      #3D2B14;
+  --ink-faded:    #7A6448;
+  --ink-ghost:    #B8A88A;
+
+  /* Rust accent */
+  --rust:         #B85C38;
+  --rust-light:   #CE7850;
+
+  /* Dark zones */
+  --dark-bg:      #1A1008;
+  --dark-card:    #251B0E;
+
+  /* Font stacks — reference Next.js font variables */
+  --display:  var(--font-playfair),    Georgia, "Times New Roman", serif;
+  --type:     var(--font-typewriter),  "Courier New", Courier, monospace;
+  --body:     var(--font-serif),       Georgia, serif;
 }
 
 @theme inline {
-  --color-background: var(--bg-primary);
-  --color-foreground: var(--text-primary);
-  --font-sans: var(--font-inter);
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --font-sans: var(--font-serif);
 }
 
+/* ─────────────────────────────────────────────
+   Base
+   ───────────────────────────────────────────── */
+
 body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Oracle card flip */
-.card-container {
-  perspective: 1000px;
+/* ─────────────────────────────────────────────
+   Film-grain overlay
+   ───────────────────────────────────────────── */
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.038;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* ─────────────────────────────────────────────
+   Typography utilities
+   ───────────────────────────────────────────── */
+
+.font-display { font-family: var(--display) !important; }
+.font-type    { font-family: var(--type)    !important; }
+
+/* ─────────────────────────────────────────────
+   Column rules — newspaper style
+   (uses currentColor so they adapt on dark sections)
+   ───────────────────────────────────────────── */
+
+.rule {
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  opacity: 0.2;
+}
+
+.rule-double {
+  width: 100%;
+  border-top:    1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  height: 5px;
+  opacity: 0.2;
+}
+
+/* ─────────────────────────────────────────────
+   Stamp label
+   ───────────────────────────────────────────── */
+
+.stamp {
+  display: inline-block;
+  border: 1.5px solid var(--rust);
+  color: var(--rust);
+  font-family: var(--type);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  transform: rotate(-1.5deg);
+  line-height: 1.4;
+}
+
+/* ─────────────────────────────────────────────
+   Oracle card — 3D flip
+   ───────────────────────────────────────────── */
+
+.card-scene {
+  perspective: 1200px;
 }
 
 .card-inner {
   position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
   transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-inner.flipped {
   transform: rotateY(180deg);
 }
 
-.card-face {
+.card-front,
+.card-back {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
@@ -47,11 +137,34 @@ body {
   transform: rotateY(180deg);
 }
 
-/* Scroll reveal */
+/* Decorative card-back face — dark with a fine crosshatch */
+.card-back-face {
+  background-color: var(--dark-bg);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 22px,
+      rgba(184, 92, 56, 0.07) 22px,
+      rgba(184, 92, 56, 0.07) 23px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 22px,
+      rgba(184, 92, 56, 0.07) 22px,
+      rgba(184, 92, 56, 0.07) 23px
+    );
+}
+
+/* ─────────────────────────────────────────────
+   Scroll reveal
+   ───────────────────────────────────────────── */
+
 .reveal {
   opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translateY(22px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .reveal.visible {

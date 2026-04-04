@@ -68,15 +68,11 @@ const QUESTIONS = [
   },
 ];
 
+const EMPTY_ANSWERS: Answers = { situation: "", mindset: "", risk: "", winning: "", plan: "" };
+
 export default function QuizPage() {
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Answers>({
-    situation: "",
-    mindset: "",
-    risk: "",
-    winning: "",
-    plan: "",
-  });
+  const [answers, setAnswers] = useState<Answers>(EMPTY_ANSWERS);
   const [loading, setLoading] = useState(false);
   const [prescription, setPrescription] = useState<PrescriptionItem[] | null>(null);
   const [error, setError] = useState("");
@@ -116,41 +112,121 @@ export default function QuizPage() {
     }
   }
 
+  /* ── Loading state ── */
   if (loading) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-4 gap-6">
-        <Image src="/shaan-avatar.png" alt="" width={64} height={64} className="animate-pulse" />
-        <p className="text-[#111111] font-semibold text-lg">Uncle Shaan is thinking...</p>
-        <p className="text-[#6B6B6B] text-sm">Finding exactly what you need to read</p>
+      <main
+        className="min-h-screen flex flex-col items-center justify-center px-6"
+        style={{ backgroundColor: "var(--paper)", color: "var(--ink)" }}
+      >
+        <div className="text-center max-w-xs">
+          <div className="rule-double mb-8 max-w-[100px] mx-auto" />
+          <Image
+            src="/shaan-avatar.png"
+            alt=""
+            width={56}
+            height={78}
+            className="mx-auto mb-6 animate-pulse object-cover"
+            style={{ filter: "sepia(0.2) contrast(1.05)" }}
+          />
+          <p
+            className="text-xl font-bold italic mb-2"
+            style={{ fontFamily: "var(--display)" }}
+          >
+            Uncle Shaan is thinking...
+          </p>
+          <p
+            className="text-xs tracking-wider"
+            style={{ fontFamily: "var(--type)", color: "var(--ink-faded)" }}
+          >
+            Finding exactly what you need to read
+          </p>
+          <div className="rule-double mt-8 max-w-[100px] mx-auto" />
+        </div>
       </main>
     );
   }
 
+  /* ── Prescription view ── */
   if (prescription) {
     return (
-      <main className="min-h-screen flex flex-col px-4 py-12 max-w-lg mx-auto">
-        <div className="flex items-center gap-2 mb-8">
-          <Link href="/" className="text-sm text-[#6B6B6B] hover:text-[#111111]">← Back</Link>
-        </div>
-        <div className="flex items-center gap-3 mb-6">
-          <Image src="/shaan-avatar.png" alt="Uncle Shaan" width={44} height={44} />
-          <div>
-            <h1 className="text-xl font-bold text-[#111111]">Your prescription</h1>
-            <p className="text-sm text-[#6B6B6B]">From Uncle Shaan, just for you</p>
+      <main
+        className="min-h-screen flex flex-col px-6 py-12 max-w-lg mx-auto"
+        style={{ backgroundColor: "var(--paper)", color: "var(--ink)" }}
+      >
+        <div className="rule-double mb-5" />
+
+        <div className="flex items-center justify-between mb-5">
+          <Link
+            href="/"
+            className="text-[0.62rem] tracking-widest uppercase transition-colors hover:text-[var(--rust)]"
+            style={{ fontFamily: "var(--type)", color: "var(--ink-faded)" }}
+          >
+            ← Back
+          </Link>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/shaan-avatar.png"
+              alt="Shaan Puri"
+              width={20}
+              height={20}
+              className="rounded-full"
+              style={{ filter: "sepia(0.2)", objectFit: "cover" }}
+            />
+            <span
+              className="text-[0.62rem] tracking-wider uppercase"
+              style={{ fontFamily: "var(--type)", color: "var(--ink-faded)" }}
+            >
+              Uncle Shaan
+            </span>
           </div>
         </div>
-        <div className="flex flex-col gap-4 mb-10">
+
+        <div className="rule mb-7" />
+
+        <div className="mb-8">
+          <p
+            className="text-[0.6rem] tracking-[0.28em] uppercase mb-2"
+            style={{ fontFamily: "var(--type)", color: "var(--rust)" }}
+          >
+            Your prescription
+          </p>
+          <h1
+            className="text-3xl font-black italic"
+            style={{ fontFamily: "var(--display)" }}
+          >
+            From Uncle Shaan
+          </h1>
+        </div>
+
+        <div className="flex flex-col gap-5 mb-10">
           {prescription.map((item, i) => (
             <PrescriptionCard key={item.entry.id} entry={item.entry} reason={item.reason} index={i} />
           ))}
         </div>
+
+        <div className="rule mb-5" />
+
         <div className="flex flex-col gap-3">
-          <Link href="/oracle" className="w-full py-3 text-center bg-[#F5A623] text-[#111111] font-bold rounded-xl text-sm active:scale-95 transition-transform">
+          <Link
+            href="/oracle"
+            className="w-full py-3.5 text-center text-[0.65rem] tracking-[0.2em] uppercase transition-colors hover:opacity-80"
+            style={{
+              fontFamily: "var(--type)",
+              backgroundColor: "var(--ink)",
+              color: "var(--paper)",
+            }}
+          >
             Pull an oracle card too
           </Link>
           <button
-            onClick={() => { setPrescription(null); setStep(0); setAnswers({ situation: "", mindset: "", risk: "", winning: "", plan: "" }); }}
-            className="w-full py-3 bg-white border border-gray-200 text-[#6B6B6B] font-medium rounded-xl text-sm active:scale-95 transition-transform"
+            onClick={() => { setPrescription(null); setStep(0); setAnswers(EMPTY_ANSWERS); }}
+            className="w-full py-3 border text-[0.65rem] tracking-[0.2em] uppercase transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]"
+            style={{
+              fontFamily: "var(--type)",
+              borderColor: "var(--ink-ghost)",
+              color: "var(--ink-faded)",
+            }}
           >
             Retake the quiz
           </button>
@@ -159,15 +235,52 @@ export default function QuizPage() {
     );
   }
 
+  /* ── Quiz flow ── */
   return (
-    <main className="min-h-screen flex flex-col px-4 py-12 max-w-lg mx-auto">
+    <main
+      className="min-h-screen flex flex-col px-6 py-12 max-w-lg mx-auto"
+      style={{ backgroundColor: "var(--paper)", color: "var(--ink)" }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between mb-10">
-        <Link href="/" className="text-sm text-[#6B6B6B] hover:text-[#111111]">← Back</Link>
+      <div className="rule-double mb-4" />
+      <div className="flex items-center justify-between mb-4">
+        <Link
+          href="/"
+          className="text-[0.62rem] tracking-widest uppercase transition-colors hover:text-[var(--rust)]"
+          style={{ fontFamily: "var(--type)", color: "var(--ink-faded)" }}
+        >
+          ← Back
+        </Link>
         <div className="flex items-center gap-2">
-          <Image src="/shaan-avatar.png" alt="" width={28} height={28} />
-          <span className="text-sm font-medium text-[#111111]">Uncle Shaan&apos;s quiz</span>
+          <Image
+            src="/shaan-avatar.png"
+            alt=""
+            width={20}
+            height={20}
+            className="rounded-full"
+            style={{ filter: "sepia(0.2)", objectFit: "cover" }}
+          />
+          <span
+            className="text-[0.62rem] tracking-wider uppercase"
+            style={{ fontFamily: "var(--type)", color: "var(--ink-faded)" }}
+          >
+            Uncle Shaan&apos;s quiz
+          </span>
         </div>
+      </div>
+
+      {/* Progress bar — thin rust line */}
+      <div
+        className="w-full h-px mb-10 relative"
+        style={{ backgroundColor: "var(--ink-ghost)" }}
+      >
+        <div
+          className="absolute left-0 top-0 h-full transition-all duration-500"
+          style={{
+            backgroundColor: "var(--rust)",
+            width: `${((step + 1) / QUESTIONS.length) * 100}%`,
+          }}
+        />
       </div>
 
       {/* Question */}
@@ -183,15 +296,27 @@ export default function QuizPage() {
         />
       </div>
 
-      {/* Next button */}
-      <div className="mt-8">
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+      {/* Continue button */}
+      <div className="mt-10">
+        {error && (
+          <p
+            className="text-xs mb-4 tracking-wide"
+            style={{ fontFamily: "var(--type)", color: "var(--rust-dark)" }}
+          >
+            {error}
+          </p>
+        )}
         <button
           onClick={handleNext}
           disabled={!canAdvance}
-          className="w-full py-4 bg-[#F5A623] text-[#111111] font-bold rounded-xl text-base disabled:opacity-40 active:scale-95 transition-all"
+          className="w-full py-4 text-[0.65rem] tracking-[0.2em] uppercase transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          style={{
+            fontFamily: "var(--type)",
+            backgroundColor: "var(--ink)",
+            color: "var(--paper)",
+          }}
         >
-          {step < QUESTIONS.length - 1 ? "Next →" : "Get my prescription"}
+          {step < QUESTIONS.length - 1 ? "Continue →" : "Get my prescription"}
         </button>
       </div>
     </main>
