@@ -4,8 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import QuizCard from "@/components/QuizCard";
-import PrescriptionCard from "@/components/PrescriptionCard";
-import type { ContentEntry } from "@/lib/content";
+import ArchetypeResult from "@/components/ArchetypeResult";
+import { getArchetype } from "@/lib/archetypes";
 
 type Answers = {
   situation: string;
@@ -13,11 +13,6 @@ type Answers = {
   risk: string;
   winning: string;
   plan: string;
-};
-
-type PrescriptionItem = {
-  entry: ContentEntry;
-  reason: string;
 };
 
 const QUESTIONS = [
@@ -68,14 +63,12 @@ const QUESTIONS = [
   },
 ];
 
-const EMPTY_ANSWERS: Answers = { situation: "", mindset: "", risk: "", winning: "", plan: "" };
+const EMPTY: Answers = { situation: "", mindset: "", risk: "", winning: "", plan: "" };
 
 export default function QuizPage() {
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Answers>(EMPTY_ANSWERS);
-  const [loading, setLoading] = useState(false);
-  const [prescription, setPrescription] = useState<PrescriptionItem[] | null>(null);
-  const [error, setError] = useState("");
+  const [answers, setAnswers] = useState<Answers>(EMPTY);
+  const [result, setResult] = useState<ReturnType<typeof getArchetype> | null>(null);
 
   const current = QUESTIONS[step];
   const currentValue = answers[current?.key];
@@ -85,77 +78,29 @@ export default function QuizPage() {
     setAnswers((a) => ({ ...a, [current.key]: val }));
   }
 
-  async function handleNext() {
+  function handleNext() {
     if (step < QUESTIONS.length - 1) {
       setStep((s) => s + 1);
     } else {
-      await submit();
+      // Instant — no API call
+      setResult(getArchetype(answers));
     }
   }
 
-  async function submit() {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/quiz", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers }),
-      });
-      if (!res.ok) throw new Error("Request failed");
-      const data = await res.json();
-      setPrescription(data.prescription);
-    } catch {
-      setError("Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
-    }
+  function handleRetake() {
+    setResult(null);
+    setStep(0);
+    setAnswers(EMPTY);
   }
 
-  /* ── Loading state ── */
-  if (loading) {
-    return (
-      <main
-        className="min-h-screen flex flex-col items-center justify-center px-6"
-        style={{ backgroundColor: "var(--paper)", color: "var(--ink)" }}
-      >
-        <div className="text-center max-w-xs">
-          <div className="rule-double mb-8 max-w-[100px] mx-auto" />
-          <Image
-            src="/shaan-avatar.png"
-            alt=""
-            width={56}
-            height={78}
-            className="mx-auto mb-6 animate-pulse object-cover"
-            style={{ filter: "sepia(0.2) contrast(1.05)" }}
-          />
-          <p
-            className="text-xl font-bold italic mb-2"
-            style={{ fontFamily: "var(--display)" }}
-          >
-            Uncle Shaan is thinking...
-          </p>
-          <p
-            className="text-xs tracking-wider"
-            style={{ fontFamily: "var(--type)", color: "var(--ink-faded)" }}
-          >
-            Finding exactly what you need to read
-          </p>
-          <div className="rule-double mt-8 max-w-[100px] mx-auto" />
-        </div>
-      </main>
-    );
-  }
-
-  /* ── Prescription view ── */
-  if (prescription) {
+  /* ── Result view ── */
+  if (result) {
     return (
       <main
         className="min-h-screen flex flex-col px-6 py-12 max-w-lg mx-auto"
         style={{ backgroundColor: "var(--paper)", color: "var(--ink)" }}
       >
-        <div className="rule-double mb-5" />
-
+        {/* Back nav */}
         <div className="flex items-center justify-between mb-5">
           <Link
             href="/"
@@ -182,55 +127,7 @@ export default function QuizPage() {
           </div>
         </div>
 
-        <div className="rule mb-7" />
-
-        <div className="mb-8">
-          <p
-            className="text-[0.6rem] tracking-[0.28em] uppercase mb-2"
-            style={{ fontFamily: "var(--type)", color: "var(--rust)" }}
-          >
-            Your prescription
-          </p>
-          <h1
-            className="text-3xl font-black italic"
-            style={{ fontFamily: "var(--display)" }}
-          >
-            From Uncle Shaan
-          </h1>
-        </div>
-
-        <div className="flex flex-col gap-5 mb-10">
-          {prescription.map((item, i) => (
-            <PrescriptionCard key={item.entry.id} entry={item.entry} reason={item.reason} index={i} />
-          ))}
-        </div>
-
-        <div className="rule mb-5" />
-
-        <div className="flex flex-col gap-3">
-          <Link
-            href="/oracle"
-            className="w-full py-3.5 text-center text-[0.65rem] tracking-[0.2em] uppercase transition-colors hover:opacity-80"
-            style={{
-              fontFamily: "var(--type)",
-              backgroundColor: "var(--ink)",
-              color: "var(--paper)",
-            }}
-          >
-            Pull an oracle card too
-          </Link>
-          <button
-            onClick={() => { setPrescription(null); setStep(0); setAnswers(EMPTY_ANSWERS); }}
-            className="w-full py-3 border text-[0.65rem] tracking-[0.2em] uppercase transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]"
-            style={{
-              fontFamily: "var(--type)",
-              borderColor: "var(--ink-ghost)",
-              color: "var(--ink-faded)",
-            }}
-          >
-            Retake the quiz
-          </button>
-        </div>
+        <ArchetypeResult archetype={result} onRetake={handleRetake} />
       </main>
     );
   }
@@ -269,7 +166,7 @@ export default function QuizPage() {
         </div>
       </div>
 
-      {/* Progress bar — thin rust line */}
+      {/* Progress — thin rust bar */}
       <div
         className="w-full h-px mb-10 relative"
         style={{ backgroundColor: "var(--ink-ghost)" }}
@@ -296,16 +193,8 @@ export default function QuizPage() {
         />
       </div>
 
-      {/* Continue button */}
+      {/* Continue */}
       <div className="mt-10">
-        {error && (
-          <p
-            className="text-xs mb-4 tracking-wide"
-            style={{ fontFamily: "var(--type)", color: "var(--rust-dark)" }}
-          >
-            {error}
-          </p>
-        )}
         <button
           onClick={handleNext}
           disabled={!canAdvance}

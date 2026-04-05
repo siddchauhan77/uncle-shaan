@@ -26,11 +26,23 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://uncle-shaan.vercel.app"),
   title: "Uncle Shaan",
-  description: "Your cool uncle's guide to life. Scroll, pull a card, or take the quiz.",
+  description:
+    "School taught you a lot. Uncle Shaan teaches you the rest. Pull a card, take the quiz, get your prescription.",
   openGraph: {
     title: "Uncle Shaan",
-    description: "Your cool uncle's guide to life.",
+    description:
+      "School taught you a lot. Uncle Shaan teaches you the rest.",
+    siteName: "Uncle Shaan",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Uncle Shaan",
+    description:
+      "School taught you a lot. Uncle Shaan teaches you the rest.",
   },
 };
 
@@ -47,6 +59,20 @@ export default function RootLayout({
       <body>
         <div className="grain-overlay" aria-hidden="true" />
         {children}
+
+        {/* Global footer */}
+        <footer
+          className="w-full px-6 py-6 text-center"
+          style={{ backgroundColor: "var(--paper)", borderTop: "1px solid rgba(26,16,8,0.1)" }}
+        >
+          <p
+            className="text-[0.55rem] tracking-wider leading-relaxed"
+            style={{ fontFamily: "var(--type)", color: "var(--ink-ghost)" }}
+          >
+            Fan-made project inspired by Shaan Puri / My First Million.
+            Not affiliated with or endorsed by Shaan Puri.
+          </p>
+        </footer>
       </body>
     </html>
   );
