@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getEntriesByIds } from "@/lib/content";
 import type { Archetype } from "@/lib/archetypes";
+import EmailCapture from "@/components/EmailCapture";
 
 type Props = {
   archetype: Archetype;
@@ -181,6 +182,11 @@ export default function ArchetypeResult({ archetype, onRetake }: Props) {
             </a>
           ))}
         </div>
+      </div>
+
+      {/* ── Email capture ── */}
+      <div className="mb-6">
+        <EmailCapture source="quiz-result" archetype={archetype.name} />
       </div>
 
       {/* ── CTAs ── */}

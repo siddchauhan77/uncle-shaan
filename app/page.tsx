@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import ScrollSection from "@/components/ScrollSection";
+import EmailCapture from "@/components/EmailCapture";
 import { getScrollytellingCards } from "@/lib/content";
 
 export default function Home() {
@@ -369,6 +370,9 @@ export default function Home() {
             >
               Just pull a card
             </Link>
+            <div className="mt-2">
+              <EmailCapture source="homepage" />
+            </div>
           </div>
           <div className="rule-double mt-10" style={{ opacity: 0.3 }} />
         </ScrollSection>
