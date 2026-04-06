@@ -50,10 +50,10 @@ export default function Home() {
               Your cool uncle
             </p>
             <h1
-              className="font-black leading-none tracking-tight"
+              className="font-black leading-tight tracking-tight"
               style={{
                 fontFamily: "var(--display)",
-                fontSize: "clamp(4.5rem, 20vw, 10rem)",
+                fontSize: "clamp(4rem, 16vw, 8rem)",
               }}
             >
               Uncle<br />Shaan
@@ -149,15 +149,15 @@ export default function Home() {
               On your 20s
             </p>
             <blockquote
-              className="font-bold italic leading-snug mb-8"
+              className="font-bold italic leading-relaxed mb-8"
               style={{
                 fontFamily: "var(--display)",
-                fontSize: "clamp(1.6rem, 5vw, 2.8rem)",
+                fontSize: "clamp(1.45rem, 3.5vw, 2.2rem)",
               }}
             >
               &ldquo;{heroQuote.quote}&rdquo;
             </blockquote>
-            <p className="text-sm leading-relaxed mb-8" style={{ color: "var(--ink-faded)" }}>
+            <p className="text-base leading-loose mb-8" style={{ fontFamily: "var(--body)", color: "rgba(240,232,213,0.72)" }}>
               {heroQuote.full_excerpt}
             </p>
             <div className="rule-double" style={{ opacity: 0.3 }} />
@@ -180,10 +180,10 @@ export default function Home() {
               On finding your thing
             </p>
             <blockquote
-              className="font-bold italic leading-tight mb-8"
+              className="font-bold italic leading-relaxed mb-8"
               style={{
                 fontFamily: "var(--display)",
-                fontSize: "clamp(1.8rem, 5vw, 3rem)",
+                fontSize: "clamp(1.5rem, 3.5vw, 2.4rem)",
               }}
             >
               &ldquo;{quote1.quote}&rdquo;
@@ -223,10 +223,10 @@ export default function Home() {
               On playing the long game
             </p>
             <blockquote
-              className="font-bold italic leading-tight mb-8"
+              className="font-bold italic leading-relaxed mb-8"
               style={{
                 fontFamily: "var(--display)",
-                fontSize: "clamp(1.8rem, 5vw, 3rem)",
+                fontSize: "clamp(1.5rem, 3.5vw, 2.4rem)",
               }}
             >
               &ldquo;{quote2.quote}&rdquo;
@@ -256,10 +256,10 @@ export default function Home() {
               On work
             </p>
             <blockquote
-              className="font-bold italic leading-tight mb-8"
+              className="font-bold italic leading-relaxed mb-8"
               style={{
                 fontFamily: "var(--display)",
-                fontSize: "clamp(1.8rem, 5vw, 3rem)",
+                fontSize: "clamp(1.5rem, 3.5vw, 2.4rem)",
               }}
             >
               &ldquo;{quote3.quote}&rdquo;
@@ -294,10 +294,10 @@ export default function Home() {
           <ScrollSection className="max-w-xl mx-auto text-center">
             <div className="rule-double mb-8" />
             <blockquote
-              className="font-bold italic leading-snug mb-6"
+              className="font-bold italic leading-relaxed mb-6"
               style={{
                 fontFamily: "var(--display)",
-                fontSize: "clamp(1.4rem, 4vw, 2.2rem)",
+                fontSize: "clamp(1.3rem, 3vw, 1.9rem)",
               }}
             >
               &ldquo;{quote4.quote}&rdquo;
@@ -332,17 +332,17 @@ export default function Home() {
             }}
           />
           <h2
-            className="font-black italic leading-tight mb-6"
+            className="font-black italic leading-snug mb-6"
             style={{
               fontFamily: "var(--display)",
-              fontSize: "clamp(2.4rem, 9vw, 4rem)",
+              fontSize: "clamp(2.2rem, 8vw, 3.5rem)",
             }}
           >
             Where are you<br />right now?
           </h2>
           <p
-            className="text-sm tracking-wide mb-10 leading-relaxed"
-            style={{ fontFamily: "var(--type)", color: "var(--ink-faded)" }}
+            className="text-base mb-10 leading-loose"
+            style={{ fontFamily: "var(--body)", color: "rgba(240,232,213,0.72)" }}
           >
             Tell Uncle Shaan what&apos;s going on.<br />
             He&apos;ll point you to exactly what you need.
