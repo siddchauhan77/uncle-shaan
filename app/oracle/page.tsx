@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import OracleCard from "@/components/OracleCard";
@@ -15,13 +15,20 @@ function pickCard(seen: Set<string>): ContentEntry {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-type Phase = "pre-pull" | "revealed" | "tossing" | "drawing";
+type Phase = "pre-pull" | "dealing-out" | "revealed" | "returning";
+
+// Timing constants (ms)
+const SLIDE_MS = 520;
+const FLIP_BACK_MS = 220;
+const AUTO_FLIP_DELAY_FIRST = 350;
+const AUTO_FLIP_DELAY_SUBSEQUENT = 200;
 
 export default function OraclePage() {
   const [seen] = useState<Set<string>>(() => new Set());
   const [current, setCurrent] = useState<ContentEntry | null>(null);
   const [phase, setPhase] = useState<Phase>("pre-pull");
   const [cardKey, setCardKey] = useState(0);
+  const [isFirstPull, setIsFirstPull] = useState(true);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearTimers = () => {
@@ -30,46 +37,83 @@ export default function OraclePage() {
   };
 
   const pull = useCallback(() => {
-    // First pull — instant reveal, no deck animation
+    // First pull — transition pre-pull UI out, deal first card
     if (phase === "pre-pull") {
       const card = pickCard(seen);
       seen.add(card.id);
       setCurrent(card);
       setCardKey((k) => k + 1);
-      setPhase("revealed");
+      // Start at "in-deck", then next frame transition to "out"
+      setPhase("dealing-out");
+      timers.current.push(
+        setTimeout(() => {
+          setPhase("revealed");
+          setIsFirstPull(false);
+        }, SLIDE_MS)
+      );
       return;
     }
 
-    // Block if an animation is already running
+    // Block during any transition
     if (phase !== "revealed") return;
 
     clearTimers();
-    setPhase("tossing");
 
-    // After toss, swap card + switch to drawing phase (deck + drawn card animate in)
+    // 1. Returning phase: card flips back, slides up into the deck
+    setPhase("returning");
+
+    // 2. After slide-in completes, swap entry + remount + start slide-out
     timers.current.push(
       setTimeout(() => {
         const card = pickCard(seen);
         seen.add(card.id);
         setCurrent(card);
         setCardKey((k) => k + 1);
-        setPhase("drawing");
+        setPhase("dealing-out");
         if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-          navigator.vibrate?.(15);
+          navigator.vibrate?.(12);
         }
-      }, 420)
+      }, SLIDE_MS)
     );
 
-    // After draw animation completes, switch to revealed (new card takes over)
+    // 3. After slide-out completes, back to revealed
     timers.current.push(
       setTimeout(() => {
         setPhase("revealed");
-      }, 420 + 460)
+      }, SLIDE_MS * 2)
     );
   }, [phase, seen]);
 
-  const showCard = phase === "revealed" || phase === "tossing";
+  // Track the active-card slide target. When phase flips to "dealing-out",
+  // we start at "in" then flip to "out" on the next frame so the CSS
+  // transition fires. Returning goes the other way.
+  const [slideTarget, setSlideTarget] = useState<"in" | "out">("in");
+
+  useEffect(() => {
+    if (phase === "dealing-out") {
+      setSlideTarget("in");
+      const raf = requestAnimationFrame(() => {
+        requestAnimationFrame(() => setSlideTarget("out"));
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+    if (phase === "returning") {
+      setSlideTarget("in");
+    }
+    if (phase === "pre-pull") {
+      setSlideTarget("in");
+    }
+  }, [phase]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      timers.current.forEach(clearTimeout);
+    };
+  }, []);
+
   const remaining = allCards.length - seen.size;
+  const showActiveArea = phase !== "pre-pull";
 
   return (
     <main
@@ -107,7 +151,7 @@ export default function OraclePage() {
         <div className="rule mt-4" />
       </div>
 
-      {phase === "pre-pull" ? (
+      {!showActiveArea ? (
         /* ── Pre-pull state ── */
         <div className="flex flex-col items-center text-center gap-8 max-w-xs mx-auto flex-1 justify-center">
 
@@ -176,65 +220,57 @@ export default function OraclePage() {
           </Link>
         </div>
       ) : (
-        <div className="flex flex-col items-center max-w-xs mx-auto w-full relative">
+        /* ── Active area: persistent deck + sliding card ── */
+        <div className="flex flex-col items-center max-w-xs mx-auto w-full">
+          <div className="relative w-full" style={{ minHeight: "820px" }}>
 
-          {/* Mini deck — visible during drawing phase */}
-          {phase === "drawing" && (
-            <div
-              className="absolute top-0 left-1/2 -translate-x-1/2 w-44 h-60 pointer-events-none anim-deck-appear"
-              style={{ zIndex: 5 }}
-            >
-              <div
-                className="absolute inset-0 translate-x-2 translate-y-2 card-back-face anim-deck-wobble"
-                style={{ boxShadow: "1px 1px 0 var(--ink-ghost)" }}
-              />
-              <div
-                className="absolute inset-0 translate-x-1 translate-y-1 card-back-face anim-deck-wobble"
-                style={{ boxShadow: "1px 1px 0 var(--ink-ghost)" }}
-              />
-            </div>
-          )}
-
-          {/* Drawn card — slides down from deck during drawing phase */}
-          {phase === "drawing" && (
-            <div
-              className="absolute top-0 left-0 right-0 flex justify-center pointer-events-none anim-card-draw"
-              style={{ zIndex: 10 }}
-            >
-              <div
-                className="w-44 h-60 card-back-face flex flex-col items-center justify-center relative"
-                style={{ boxShadow: "5px 7px 28px rgba(26,16,8,0.4)" }}
-              >
-                <div className="absolute inset-3 border border-[var(--rust)] opacity-25" />
-                <div className="absolute inset-[18px] border border-[var(--rust)] opacity-12" />
-                <div className="flex flex-col items-center gap-3 z-10">
-                  <span className="text-[var(--rust)] opacity-35 text-2xl select-none">✦</span>
-                  <p
-                    className="text-[var(--ink-ghost)] text-xl font-bold italic opacity-40"
-                    style={{ fontFamily: "var(--display)" }}
-                  >
-                    Shaan
-                  </p>
-                  <span className="text-[var(--rust)] opacity-35 text-2xl select-none">✦</span>
+            {/* Persistent mini deck at top — never moves */}
+            <div className="mini-deck" style={{ height: "240px" }}>
+              <div className="relative w-44 h-60 mx-auto">
+                <div
+                  className="absolute inset-0 translate-x-2 translate-y-2 card-back-face"
+                  style={{ boxShadow: "1px 1px 0 var(--ink-ghost)" }}
+                />
+                <div
+                  className="absolute inset-0 translate-x-1 translate-y-1 card-back-face"
+                  style={{ boxShadow: "1px 1px 0 var(--ink-ghost)" }}
+                />
+                <div
+                  className="absolute inset-0 card-back-face flex flex-col items-center justify-center"
+                  style={{ boxShadow: "3px 4px 18px rgba(26,16,8,0.3)" }}
+                >
+                  <div className="absolute inset-3 border border-[var(--rust)] opacity-25" />
+                  <div className="absolute inset-[18px] border border-[var(--rust)] opacity-12" />
+                  <div className="flex flex-col items-center gap-3 z-10">
+                    <span className="text-[var(--rust)] opacity-35 text-2xl select-none">✦</span>
+                    <p
+                      className="text-[var(--ink-ghost)] text-xl font-bold italic opacity-40"
+                      style={{ fontFamily: "var(--display)" }}
+                    >
+                      Shaan
+                    </p>
+                    <span className="text-[var(--rust)] opacity-35 text-2xl select-none">✦</span>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Main oracle card — visible during revealed + tossing phases */}
-          {showCard && current && (
-            <OracleCard
-              key={cardKey}
-              entry={current}
-              onPullAnother={pull}
-              exiting={phase === "tossing"}
-              autoFlipDelay={phase === "tossing" ? 0 : 350}
-              disabled={phase !== "revealed"}
-            />
-          )}
-
-          {/* Placeholder to hold layout height during drawing */}
-          {phase === "drawing" && <div style={{ height: "620px" }} />}
+            {/* Active card — transitions between deck position and table position */}
+            {current && (
+              <div className="active-card" data-slide={slideTarget}>
+                <OracleCard
+                  key={cardKey}
+                  entry={current}
+                  onPullAnother={pull}
+                  exiting={phase === "returning"}
+                  autoFlipDelay={
+                    isFirstPull ? AUTO_FLIP_DELAY_FIRST : AUTO_FLIP_DELAY_SUBSEQUENT
+                  }
+                  disabled={phase !== "revealed"}
+                />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
