@@ -7,17 +7,31 @@ import type { ContentEntry } from "@/lib/content";
 type Props = {
   entry: ContentEntry;
   onPullAnother: () => void;
+  exiting?: boolean;
+  autoFlipDelay?: number;
+  disabled?: boolean;
 };
 
-export default function OracleCard({ entry, onPullAnother }: Props) {
+export default function OracleCard({
+  entry,
+  onPullAnother,
+  exiting = false,
+  autoFlipDelay = 350,
+  disabled = false,
+}: Props) {
   const [flipped, setFlipped] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Auto-flip to reveal after mount
   useEffect(() => {
-    const t = setTimeout(() => setFlipped(true), 350);
+    const t = setTimeout(() => setFlipped(true), autoFlipDelay);
     return () => clearTimeout(t);
-  }, []);
+  }, [autoFlipDelay]);
+
+  // When exiting, flip back to face-down fast before the toss
+  useEffect(() => {
+    if (exiting) setFlipped(false);
+  }, [exiting]);
 
   async function handleShare() {
     const text = `"${entry.quote}"\n\n— ${entry.source_title}\n\nvia Uncle Shaan`;
@@ -35,11 +49,14 @@ export default function OracleCard({ entry, onPullAnother }: Props) {
 
       {/* ── Card ── */}
       <div
-        className="card-scene w-full cursor-pointer"
+        className={`card-scene w-full cursor-pointer ${exiting ? "anim-toss" : ""}`}
         style={{ height: "460px" }}
-        onClick={() => setFlipped((f) => !f)}
+        onClick={() => !exiting && setFlipped((f) => !f)}
       >
-        <div className={`card-inner ${flipped ? "flipped" : ""}`}>
+        <div
+          className={`card-inner ${flipped ? "flipped" : ""}`}
+          style={exiting ? { transition: "transform 180ms ease-in" } : undefined}
+        >
 
           {/* FRONT = decorative back-of-card (shows before flip) */}
           <div
@@ -157,14 +174,16 @@ export default function OracleCard({ entry, onPullAnother }: Props) {
       <div className="flex flex-col gap-3 w-full">
         <button
           onClick={onPullAnother}
-          className="w-full py-3.5 bg-[var(--ink)] text-[var(--paper)] text-[0.65rem] tracking-[0.18em] uppercase transition-colors hover:bg-[var(--ink-mid)]"
+          disabled={disabled}
+          className="w-full py-3.5 bg-[var(--ink)] text-[var(--paper)] text-[0.65rem] tracking-[0.18em] uppercase transition-colors hover:bg-[var(--ink-mid)] disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ fontFamily: "var(--type)" }}
         >
           Pull Another Card
         </button>
         <button
           onClick={handleShare}
-          className="w-full py-3 border border-[var(--ink-ghost)] text-[var(--ink-faded)] text-[0.65rem] tracking-[0.18em] uppercase transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)]"
+          disabled={disabled}
+          className="w-full py-3 border border-[var(--ink-ghost)] text-[var(--ink-faded)] text-[0.65rem] tracking-[0.18em] uppercase transition-colors hover:border-[var(--ink)] hover:text-[var(--ink)] disabled:opacity-50"
           style={{ fontFamily: "var(--type)" }}
         >
           {copied ? "Copied to clipboard" : "Share this"}
