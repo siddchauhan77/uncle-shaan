@@ -15,20 +15,17 @@ function pickCard(seen: Set<string>): ContentEntry {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-type Phase = "pre-pull" | "dealing-out" | "revealed" | "returning";
+type Phase = "pre-pull" | "materializing" | "revealed" | "dissolving";
 
-// Timing constants (ms)
-const SLIDE_MS = 520;
-const FLIP_BACK_MS = 220;
-const AUTO_FLIP_DELAY_FIRST = 350;
-const AUTO_FLIP_DELAY_SUBSEQUENT = 200;
+const MATERIALIZE_MS = 640;
+const DISSOLVE_MS = 420;
 
 export default function OraclePage() {
   const [seen] = useState<Set<string>>(() => new Set());
   const [current, setCurrent] = useState<ContentEntry | null>(null);
   const [phase, setPhase] = useState<Phase>("pre-pull");
   const [cardKey, setCardKey] = useState(0);
-  const [isFirstPull, setIsFirstPull] = useState(true);
+  const [cardState, setCardState] = useState<"hidden" | "shown">("hidden");
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearTimers = () => {
@@ -36,81 +33,71 @@ export default function OraclePage() {
     timers.current = [];
   };
 
+  // Drive the CSS data-state: start hidden, flip to shown on next frame
+  // so the browser registers the initial state and the transition fires.
+  useEffect(() => {
+    if (phase === "materializing") {
+      setCardState("hidden");
+      const raf1 = requestAnimationFrame(() => {
+        requestAnimationFrame(() => setCardState("shown"));
+      });
+      return () => cancelAnimationFrame(raf1);
+    }
+    if (phase === "dissolving") {
+      setCardState("hidden");
+    }
+    if (phase === "pre-pull") {
+      setCardState("hidden");
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    return () => {
+      timers.current.forEach(clearTimeout);
+    };
+  }, []);
+
   const pull = useCallback(() => {
-    // First pull — transition pre-pull UI out, deal first card
     if (phase === "pre-pull") {
       const card = pickCard(seen);
       seen.add(card.id);
       setCurrent(card);
       setCardKey((k) => k + 1);
-      // Start at "in-deck", then next frame transition to "out"
-      setPhase("dealing-out");
+      setPhase("materializing");
       timers.current.push(
-        setTimeout(() => {
-          setPhase("revealed");
-          setIsFirstPull(false);
-        }, SLIDE_MS)
+        setTimeout(() => setPhase("revealed"), MATERIALIZE_MS)
       );
       return;
     }
 
-    // Block during any transition
     if (phase !== "revealed") return;
 
     clearTimers();
 
-    // 1. Returning phase: card flips back, slides up into the deck
-    setPhase("returning");
+    // 1. Dissolve the current card out
+    setPhase("dissolving");
 
-    // 2. After slide-in completes, swap entry + remount + start slide-out
+    // 2. Mid-dissolve, swap entry + remount + materialize new card
     timers.current.push(
       setTimeout(() => {
         const card = pickCard(seen);
         seen.add(card.id);
         setCurrent(card);
         setCardKey((k) => k + 1);
-        setPhase("dealing-out");
+        setPhase("materializing");
         if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-          navigator.vibrate?.(12);
+          navigator.vibrate?.(10);
         }
-      }, SLIDE_MS)
+      }, DISSOLVE_MS)
     );
 
-    // 3. After slide-out completes, back to revealed
+    // 3. Settle into revealed after materialize completes
     timers.current.push(
       setTimeout(() => {
         setPhase("revealed");
-      }, SLIDE_MS * 2)
+      }, DISSOLVE_MS + MATERIALIZE_MS)
     );
   }, [phase, seen]);
-
-  // Track the active-card slide target. When phase flips to "dealing-out",
-  // we start at "in" then flip to "out" on the next frame so the CSS
-  // transition fires. Returning goes the other way.
-  const [slideTarget, setSlideTarget] = useState<"in" | "out">("in");
-
-  useEffect(() => {
-    if (phase === "dealing-out") {
-      setSlideTarget("in");
-      const raf = requestAnimationFrame(() => {
-        requestAnimationFrame(() => setSlideTarget("out"));
-      });
-      return () => cancelAnimationFrame(raf);
-    }
-    if (phase === "returning") {
-      setSlideTarget("in");
-    }
-    if (phase === "pre-pull") {
-      setSlideTarget("in");
-    }
-  }, [phase]);
-
-  // Cleanup timers on unmount
-  useEffect(() => {
-    return () => {
-      timers.current.forEach(clearTimeout);
-    };
-  }, []);
 
   const remaining = allCards.length - seen.size;
   const showActiveArea = phase !== "pre-pull";
@@ -154,8 +141,6 @@ export default function OraclePage() {
       {!showActiveArea ? (
         /* ── Pre-pull state ── */
         <div className="flex flex-col items-center text-center gap-8 max-w-xs mx-auto flex-1 justify-center">
-
-          {/* Stacked deck visual */}
           <div className="relative w-44 h-60 mx-auto">
             <div
               className="absolute inset-0 translate-x-2.5 translate-y-2.5 card-back-face"
@@ -220,15 +205,15 @@ export default function OraclePage() {
           </Link>
         </div>
       ) : (
-        /* ── Active area: persistent deck + sliding card ── */
+        /* ── Active area: persistent deck + card materializing on top ── */
         <div className="flex flex-col items-center max-w-xs mx-auto w-full">
-          <div className="relative w-full" style={{ minHeight: "820px" }}>
+          <div className="relative w-full" style={{ minHeight: "620px" }}>
 
-            {/* Persistent mini deck at top — never moves */}
-            <div className="mini-deck" style={{ height: "240px" }}>
-              <div className="relative w-44 h-60 mx-auto">
+            {/* Persistent deck — sits behind, always visible */}
+            <div className="persistent-deck">
+              <div className="relative w-44 h-60">
                 <div
-                  className="absolute inset-0 translate-x-2 translate-y-2 card-back-face"
+                  className="absolute inset-0 translate-x-2.5 translate-y-2.5 card-back-face"
                   style={{ boxShadow: "1px 1px 0 var(--ink-ghost)" }}
                 />
                 <div
@@ -237,7 +222,7 @@ export default function OraclePage() {
                 />
                 <div
                   className="absolute inset-0 card-back-face flex flex-col items-center justify-center"
-                  style={{ boxShadow: "3px 4px 18px rgba(26,16,8,0.3)" }}
+                  style={{ boxShadow: "4px 5px 20px rgba(26,16,8,0.35)" }}
                 >
                   <div className="absolute inset-3 border border-[var(--rust)] opacity-25" />
                   <div className="absolute inset-[18px] border border-[var(--rust)] opacity-12" />
@@ -255,17 +240,14 @@ export default function OraclePage() {
               </div>
             </div>
 
-            {/* Active card — transitions between deck position and table position */}
+            {/* Active card — materializes on top of deck */}
             {current && (
-              <div className="active-card" data-slide={slideTarget}>
+              <div className="active-card" data-state={cardState}>
                 <OracleCard
                   key={cardKey}
                   entry={current}
                   onPullAnother={pull}
-                  exiting={phase === "returning"}
-                  autoFlipDelay={
-                    isFirstPull ? AUTO_FLIP_DELAY_FIRST : AUTO_FLIP_DELAY_SUBSEQUENT
-                  }
+                  autoFlipDelay={320}
                   disabled={phase !== "revealed"}
                 />
               </div>
