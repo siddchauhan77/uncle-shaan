@@ -9,7 +9,7 @@ import { getArchetype } from "@/lib/archetypes";
 
 type Answers = {
   situation: string;
-  mindset: string;
+  mindset: string[];
   risk: string;
   winning: string;
   plan: string;
@@ -20,6 +20,7 @@ const QUESTIONS = [
     key: "situation" as keyof Answers,
     question: "Where are you right now?",
     type: "choice" as const,
+    multi: false,
     options: [
       { label: "In school", value: "in-school" },
       { label: "Just graduated", value: "just-graduated" },
@@ -29,8 +30,9 @@ const QUESTIONS = [
   },
   {
     key: "mindset" as keyof Answers,
-    question: "What's the main thing on your mind?",
+    question: "What's on your mind?",
     type: "choice" as const,
+    multi: true,
     options: [
       { label: "Money — I need to make more", value: "money" },
       { label: "Direction — I don't know what I want", value: "direction" },
@@ -42,18 +44,21 @@ const QUESTIONS = [
     key: "risk" as keyof Answers,
     question: "How do you feel about risk?",
     type: "scale" as const,
+    multi: false,
     options: [],
   },
   {
     key: "winning" as keyof Answers,
     question: "What would 'winning' look like in 2 years?",
     type: "text" as const,
+    multi: false,
     options: [],
   },
   {
     key: "plan" as keyof Answers,
     question: "Be honest — do you have a plan?",
     type: "choice" as const,
+    multi: false,
     options: [
       { label: "Yes, I have a clear plan", value: "yes" },
       { label: "Kind of, sort of", value: "kind-of" },
@@ -63,7 +68,7 @@ const QUESTIONS = [
   },
 ];
 
-const EMPTY: Answers = { situation: "", mindset: "", risk: "", winning: "", plan: "" };
+const EMPTY: Answers = { situation: "", mindset: [], risk: "", winning: "", plan: "" };
 
 export default function QuizPage() {
   const [step, setStep] = useState(0);
@@ -71,10 +76,12 @@ export default function QuizPage() {
   const [result, setResult] = useState<ReturnType<typeof getArchetype> | null>(null);
 
   const current = QUESTIONS[step];
-  const currentValue = answers[current?.key];
-  const canAdvance = currentValue.trim().length > 0;
+  const currentValue = answers[current.key];
+  const canAdvance = Array.isArray(currentValue)
+    ? currentValue.length > 0
+    : currentValue.trim().length > 0;
 
-  function handleChange(val: string) {
+  function handleChange(val: string | string[]) {
     setAnswers((a) => ({ ...a, [current.key]: val }));
   }
 
@@ -186,6 +193,7 @@ export default function QuizPage() {
           question={current.question}
           options={current.options}
           type={current.type}
+          multi={current.multi}
           value={currentValue}
           onChange={handleChange}
           questionNumber={step + 1}

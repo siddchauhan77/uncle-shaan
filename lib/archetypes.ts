@@ -156,7 +156,7 @@ export const ARCHETYPES: Record<ArchetypeId, Archetype> = {
 
 type Answers = {
   situation: string;
-  mindset: string;
+  mindset: string[];
   risk: string;
   winning: string;
   plan: string;
@@ -165,6 +165,7 @@ type Answers = {
 export function getArchetype(answers: Answers): Archetype {
   const { situation, mindset, plan } = answers;
   const risk = parseInt(answers.risk) || 3;
+  const mindsetSet = new Set(mindset);
 
   // Building with some conviction → Ready to Leap
   if (situation === "building" && (plan === "yes" || plan === "kind-of")) {
@@ -185,7 +186,7 @@ export function getArchetype(answers: Answers): Archetype {
   if (
     situation === "just-graduated" &&
     risk >= 4 &&
-    mindset === "money"
+    mindsetSet.has("money")
   ) {
     return ARCHETYPES["stuck-starter"];
   }

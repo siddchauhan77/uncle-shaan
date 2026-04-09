@@ -6,8 +6,9 @@ type Props = {
   question: string;
   options?: Option[];
   type?: "choice" | "scale" | "text";
-  value: string;
-  onChange: (val: string) => void;
+  multi?: boolean;
+  value: string | string[];
+  onChange: (val: string | string[]) => void;
   questionNumber: number;
   total: number;
 };
@@ -16,11 +17,24 @@ export default function QuizCard({
   question,
   options,
   type = "choice",
+  multi = false,
   value,
   onChange,
   questionNumber,
   total,
 }: Props) {
+  const selectedSet = new Set(Array.isArray(value) ? value : value ? [value] : []);
+
+  function handleChoiceClick(optValue: string) {
+    if (multi) {
+      const next = new Set(selectedSet);
+      if (next.has(optValue)) next.delete(optValue);
+      else next.add(optValue);
+      onChange(Array.from(next));
+    } else {
+      onChange(optValue);
+    }
+  }
   return (
     <div className="flex flex-col gap-7">
 
@@ -47,24 +61,47 @@ export default function QuizCard({
       {/* Choice options — styled as printed form checkboxes */}
       {type === "choice" && options && (
         <div className="flex flex-col gap-2.5">
-          {options.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => onChange(opt.value)}
-              className={`text-left px-5 py-4 border transition-all duration-150 ${
-                value === opt.value
-                  ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
-                  : "border-[var(--ink-ghost)] bg-transparent text-[var(--ink)] hover:border-[var(--ink-faded)]"
-              }`}
+          {multi && (
+            <p
+              className="text-[0.6rem] tracking-[0.2em] uppercase text-[var(--ink-faded)] mb-1"
+              style={{ fontFamily: "var(--type)" }}
             >
-              <span
-                className="text-sm tracking-wide"
-                style={{ fontFamily: "var(--type)" }}
+              Select all that apply
+            </p>
+          )}
+          {options.map((opt) => {
+            const selected = selectedSet.has(opt.value);
+            return (
+              <button
+                key={opt.value}
+                onClick={() => handleChoiceClick(opt.value)}
+                className={`text-left px-5 py-4 border transition-all duration-150 flex items-center gap-3 ${
+                  selected
+                    ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
+                    : "border-[var(--ink-ghost)] bg-transparent text-[var(--ink)] hover:border-[var(--ink-faded)]"
+                }`}
               >
-                {opt.label}
-              </span>
-            </button>
-          ))}
+                {multi && (
+                  <span
+                    className={`inline-flex items-center justify-center w-4 h-4 border flex-shrink-0 ${
+                      selected
+                        ? "border-[var(--paper)] bg-[var(--paper)] text-[var(--ink)]"
+                        : "border-[var(--ink-ghost)]"
+                    }`}
+                    style={{ fontFamily: "var(--type)", fontSize: "0.7rem", lineHeight: 1 }}
+                  >
+                    {selected ? "×" : ""}
+                  </span>
+                )}
+                <span
+                  className="text-sm tracking-wide"
+                  style={{ fontFamily: "var(--type)" }}
+                >
+                  {opt.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -77,7 +114,7 @@ export default function QuizCard({
                 key={n}
                 onClick={() => onChange(String(n))}
                 className={`flex-1 aspect-square border flex items-center justify-center transition-all duration-150 ${
-                  value === String(n)
+                  (typeof value === "string" ? value : "") === String(n)
                     ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
                     : "border-[var(--ink-ghost)] text-[var(--ink)] hover:border-[var(--ink-faded)]"
                 }`}
@@ -112,7 +149,7 @@ export default function QuizCard({
       {type === "text" && (
         <div>
           <textarea
-            value={value}
+            value={typeof value === "string" ? value : ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Write here..."
             rows={3}
