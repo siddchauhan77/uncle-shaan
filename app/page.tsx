@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ScrollSection from "@/components/ScrollSection";
 import EmailCapture from "@/components/EmailCapture";
+import FloatingCTA from "@/components/FloatingCTA";
 import { getScrollytellingCards } from "@/lib/content";
 
 export default function Home() {
@@ -40,9 +41,9 @@ export default function Home() {
           <div className="rule" />
         </ScrollSection>
 
-        {/* Giant masthead title */}
+        {/* Masthead title — compact */}
         <ScrollSection delay={120}>
-          <div className="text-center py-10">
+          <div className="text-center pt-6 pb-4">
             <p
               className="text-[0.6rem] tracking-[0.4em] uppercase mb-3"
               style={{ fontFamily: "var(--type)", color: "var(--rust)" }}
@@ -50,73 +51,92 @@ export default function Home() {
               Your cool uncle
             </p>
             <h1
-              className="font-black leading-tight tracking-tight"
+              className="font-black leading-[0.88] tracking-tight"
               style={{
                 fontFamily: "var(--display)",
-                fontSize: "clamp(4rem, 16vw, 8rem)",
+                fontSize: "clamp(3.4rem, 13vw, 6.5rem)",
               }}
             >
               Uncle<br />Shaan
             </h1>
             <p
-              className="text-[0.6rem] tracking-[0.28em] uppercase mt-3"
+              className="text-[0.62rem] tracking-[0.22em] uppercase mt-4 max-w-[22rem] mx-auto leading-relaxed"
               style={{ fontFamily: "var(--type)", color: "var(--ink-faded)" }}
             >
-              School taught you a lot. He teaches you the rest.
+              School taught you a lot.<br />He teaches you the rest.
             </p>
           </div>
         </ScrollSection>
 
-        <div className="rule-double mb-8" />
+        <div className="rule-double mb-6" />
 
-        {/* Photo + CTA */}
-        <ScrollSection delay={240}>
-          <div className="flex flex-col sm:flex-row items-center gap-8 max-w-md mx-auto w-full">
+        {/* PRIMARY CTA — big, centered, impossible to miss */}
+        <ScrollSection delay={220}>
+          <div className="max-w-md mx-auto w-full flex flex-col items-center gap-3">
+            <p
+              className="text-[0.58rem] tracking-[0.32em] uppercase mb-1"
+              style={{ fontFamily: "var(--type)", color: "var(--rust)" }}
+            >
+              ✦ Start here ✦
+            </p>
+            <Link
+              href="/quiz"
+              className="group w-full flex flex-col items-center justify-center py-5 px-6 transition-all hover:-translate-y-0.5"
+              style={{
+                fontFamily: "var(--type)",
+                backgroundColor: "var(--ink)",
+                color: "var(--paper)",
+                boxShadow: "5px 5px 0 var(--rust)",
+              }}
+            >
+              <span className="text-[0.85rem] tracking-[0.18em] uppercase font-bold flex items-center gap-2">
+                Take the 60-second quiz
+                <span
+                  aria-hidden="true"
+                  className="transition-transform group-hover:translate-x-1"
+                >
+                  →
+                </span>
+              </span>
+              <span
+                className="text-[0.58rem] tracking-[0.2em] uppercase mt-2 opacity-60"
+              >
+                Get a personalized prescription from Shaan&apos;s essays
+              </span>
+            </Link>
+
+            <Link
+              href="/oracle"
+              className="mt-1 text-[0.62rem] tracking-[0.2em] uppercase underline underline-offset-[5px] decoration-[1px] transition-colors hover:text-[var(--rust)]"
+              style={{ fontFamily: "var(--type)", color: "var(--ink-faded)" }}
+            >
+              Or pull a random oracle card →
+            </Link>
+          </div>
+        </ScrollSection>
+
+        {/* Photo + quote — supporting evidence, below the CTA */}
+        <ScrollSection delay={340}>
+          <div className="flex items-center gap-5 max-w-md mx-auto w-full mt-10">
             <div className="shrink-0">
               <Image
                 src="/shaan-avatar.png"
                 alt="Shaan Puri"
-                width={96}
-                height={134}
+                width={72}
+                height={100}
                 className="object-cover"
                 style={{
                   filter: "sepia(0.12) contrast(1.08)",
-                  boxShadow: "4px 4px 0 var(--ink-ghost)",
+                  boxShadow: "3px 3px 0 var(--ink-ghost)",
                 }}
               />
             </div>
-            <div className="flex flex-col gap-4 flex-1">
-              <p
-                className="text-lg italic leading-relaxed"
-                style={{ fontFamily: "var(--display)", color: "var(--ink-mid)" }}
-              >
-                &ldquo;Real talk on life, money, and figuring out what you actually want.&rdquo;
-              </p>
-              <div className="flex flex-col gap-2">
-                <Link
-                  href="/quiz"
-                  className="w-full py-3.5 text-center text-[0.65rem] tracking-[0.2em] uppercase transition-colors hover:opacity-80"
-                  style={{
-                    fontFamily: "var(--type)",
-                    backgroundColor: "var(--ink)",
-                    color: "var(--paper)",
-                  }}
-                >
-                  Take the Quiz
-                </Link>
-                <Link
-                  href="/oracle"
-                  className="w-full py-3 text-center text-[0.65rem] tracking-[0.2em] uppercase border transition-colors hover:bg-[var(--ink)] hover:text-[var(--paper)]"
-                  style={{
-                    fontFamily: "var(--type)",
-                    borderColor: "var(--ink)",
-                    color: "var(--ink)",
-                  }}
-                >
-                  Pull a Card
-                </Link>
-              </div>
-            </div>
+            <p
+              className="text-sm italic leading-relaxed flex-1"
+              style={{ fontFamily: "var(--display)", color: "var(--ink-mid)" }}
+            >
+              &ldquo;Real talk on life, money, and figuring out what you actually want.&rdquo;
+            </p>
           </div>
         </ScrollSection>
 
@@ -377,6 +397,8 @@ export default function Home() {
           <div className="rule-double mt-10" style={{ opacity: 0.3 }} />
         </ScrollSection>
       </section>
+
+      <FloatingCTA />
     </main>
   );
 }
