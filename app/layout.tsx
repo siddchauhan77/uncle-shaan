@@ -72,6 +72,15 @@ export default function RootLayout({
             Fan-made project inspired by Shaan Puri / My First Million.
             Not affiliated with or endorsed by Shaan Puri.
           </p>
+          <a
+            href="https://uncle-sam-ten.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mt-2 text-[0.55rem] tracking-[0.2em] uppercase transition-colors hover:underline"
+            style={{ fontFamily: "var(--type)", color: "var(--rust)" }}
+          >
+            See also: Uncle Sam →
+          </a>
         </footer>
       </body>
     </html>
